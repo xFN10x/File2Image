@@ -1,8 +1,6 @@
 package file2image;
 
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,7 +8,6 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;

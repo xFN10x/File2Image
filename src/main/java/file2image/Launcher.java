@@ -2,8 +2,6 @@ package file2image;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import file2image.methods.PureByte;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -39,14 +37,13 @@ public class Launcher extends Application {
                 var proposedOutput = new File(outputFilePathField.getText());
                 var proposedInput = new File(inputFilePathField.getText());
 
-                if (!proposedOutput.exists() && proposedInput.exists())
-                {
+                if (!proposedOutput.exists() && proposedInput.exists()) {
                     convertButton.setDisable(true);
                     return;
                 }
                 Path.of(proposedOutput.toURI());
                 Path.of(proposedInput.toURI());
-//System.out.println("triggwer");
+                // System.out.println("triggwer");
                 convertButton.setDisable(false);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -55,7 +52,7 @@ public class Launcher extends Application {
         });
     }
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         launch(args);
     }
 
