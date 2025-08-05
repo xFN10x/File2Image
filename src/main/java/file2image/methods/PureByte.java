@@ -18,12 +18,21 @@ import javafx.scene.control.Alert.AlertType;
 
 public class PureByte implements Method {
 
+    private ConvertWindow[] convRef = new ConvertWindow[1];
+
     @Override
     public void Start(Scene scene, File Input, Path Output) {
         try {
-            ConvertWindow convertWin = new ConvertWindow(scene);
+
             Platform.runLater(() -> {
-                convertWin.show();
+                try {
+                    ConvertWindow convertWin = new ConvertWindow((int) (Files.size(Input.toPath()) / 3));
+                    convertWin.init();
+                    convertWin.show();
+                    convRef[0] = convertWin;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
             int pixelAmount = (int) (Files.size(Input.toPath()) / 3);
             // byte[] InputBytes = Files.readAllBytes(Input.toPath()); too much ram
@@ -44,6 +53,10 @@ public class PureByte implements Method {
                     byte[] pixelByteTrio = new byte[3];
                     for (int i = 0; i < pixelAmount; i++) {
                         stream.readNBytes(pixelByteTrio, 0, 3);
+                        final long bytesread = i;
+
+                        if (convRef[0] != null)
+                            convRef[0].setBytesRead(bytesread);
 
                         if (index >= width) {
                             line++;
@@ -72,13 +85,26 @@ public class PureByte implements Method {
 
             ImageIO.write(BI, "png", outFile);
             Platform.runLater(() -> {
+                convRef[0].dispose();
+
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setTitle("Conversion Success");
-                alert.setContentText("The file was converted in " + (System.currentTimeMillis() - starttime) + " ms.");
+                alert.setContentText(
+                        "The file was converted in " + Math.abs(System.currentTimeMillis() - starttime) + " ms.");
                 alert.show();
             });
         } catch (Exception e) {
             e.printStackTrace();
+            Platform.runLater(() -> {
+                convRef[0].dispose();
+
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Conversion Failed");
+                alert.setHeaderText(e.getMessage());
+                alert.setContentText("The conversion failed.");
+                alert.show();
+            });
+            return;
         }
     }
 

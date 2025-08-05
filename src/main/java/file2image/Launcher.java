@@ -2,9 +2,11 @@ package file2image;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import file2image.methods.PureByte;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,6 +25,36 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public class Launcher extends Application {
+
+    public static final String VERSION = "1.0";
+
+    private final Button convertButton = new Button("Convert");
+    private final TextField outputFilePathField = new TextField("Please select a file.");
+    private final TextField inputFilePathField = new TextField("Please select a file.");
+
+    public void refreshButton() {
+
+        Platform.runLater(() -> {
+            try {
+                var proposedOutput = new File(outputFilePathField.getText());
+                var proposedInput = new File(inputFilePathField.getText());
+
+                if (!proposedOutput.exists() && proposedInput.exists())
+                {
+                    convertButton.setDisable(true);
+                    return;
+                }
+                Path.of(proposedOutput.toURI());
+                Path.of(proposedInput.toURI());
+//System.out.println("triggwer");
+                convertButton.setDisable(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+                convertButton.setDisable(true);
+            }
+        });
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -31,8 +63,8 @@ public class Launcher extends Application {
     public void start(Stage primaryStage) throws Exception {
         TabPane tabs = new TabPane();
 
-        TextField inputFilePathField = new TextField("Please select a file.");
-        inputFilePathField.setEditable(false);
+        inputFilePathField.textProperty().addListener(c -> refreshButton());
+        // inputFilePathField.setEditable(false);
         inputFilePathField.setMinSize(320, 25);
         Button inputFileButton = new Button("...");
         inputFileButton.setOnAction(e -> {
@@ -41,9 +73,8 @@ public class Launcher extends Application {
 
             inputFilePathField.setText(loadUI.showOpenDialog(primaryStage).getAbsolutePath());
         });
-
-        TextField outputFilePathField = new TextField("Please select a file.");
-        outputFilePathField.setEditable(false);
+        outputFilePathField.textProperty().addListener(c -> refreshButton());
+        // outputFilePathField.setEditable(false);
         outputFilePathField.setMinSize(320, 25);
         Button outputFileButton = new Button("...");
         outputFileButton.setOnAction(e -> {
@@ -67,12 +98,7 @@ public class Launcher extends Application {
         HBox methodStuff = new HBox(8, methodText, methodSelection);
         methodStuff.setAlignment(Pos.CENTER);
 
-        Button convertButton = new Button("Convert");
         convertButton.setMinSize(380, 30);
-        convertButton.setOnAction(e -> {
-            new Thread(() -> new PureByte().Start(new File(inputFilePathField.getText()),
-                    Path.of(outputFilePathField.getText()))).run();
-        });
 
         VBox stuff = new VBox(10, inputStuff, outputStuff, methodStuff, convertButton);
         stuff.setAlignment(Pos.TOP_CENTER);
@@ -87,8 +113,16 @@ public class Launcher extends Application {
 
         Scene scene = new Scene(tabs, 400, 195);
 
+        convertButton.setOnAction(e -> {
+            new Thread(() -> new PureByte().Start(scene, new File(inputFilePathField.getText()),
+                    Path.of(outputFilePathField.getText()))).start();
+        });
+
+        refreshButton();
+
+        primaryStage.setResizable(false);
         primaryStage.getIcons().add(new Image(getClass().getResource("/icon.png").toExternalForm()));
-        primaryStage.setTitle("File2Img");
+        primaryStage.setTitle("File2Img " + VERSION);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
