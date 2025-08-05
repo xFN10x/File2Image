@@ -36,7 +36,7 @@ public class Intensity implements Method {
             });
             int pixelAmount = (int) (Files.size(Input.toPath()) / 3);
             // byte[] InputBytes = Files.readAllBytes(Input.toPath()); too much ram
-            System.out.println(pixelAmount);
+            //System.out.println(pixelAmount);
             int dimension = (int) Math.ceil(Math.sqrt(pixelAmount));
             BufferedImage BI = new BufferedImage(dimension, dimension, BufferedImage.TYPE_INT_RGB);
             File outFile = Output.toFile();
@@ -56,13 +56,13 @@ public class Intensity implements Method {
 
                         if (convRef[0] != null)
                             convRef[0].setBytesRead(bytesread);
-                        System.out.println(index);
-                        System.out.println(line);
+                        //System.out.println(index);
+                        //System.out.println(line);
                         if (index >= dimension) {
                             line++;
                             index = 0;
-                            System.out.println(index);
-                            System.out.println(line);
+                            //System.out.println(index);
+                            //System.out.println(line);
                         }
 
                         int intensity = Math
@@ -82,6 +82,40 @@ public class Intensity implements Method {
 
                     if (!outFile.exists())
                         outFile.createNewFile();
+                    int lastColor = 0;
+                    int currentColor = 0;
+
+                    int passes = 1000;
+
+                    switch (sorting) {
+                        case SortingMode.brightness:
+                            for (int col = 0; col < BI.getWidth(); col++) {
+                                for (int i = 0; i < passes; i++) {
+                                    convRef[0].addLog("Sorting pass", i * col, passes * BI.getWidth());
+                                    for (int y = 1; y < BI.getHeight(); y++) {
+                                        lastColor = currentColor;
+                                        currentColor = BI.getRGB(col, y);
+
+                                        int r = (currentColor >> 16) & 0xFF;
+                                        int g = (currentColor >> 8) & 0xFF;
+                                        int b = currentColor & 0xFF;
+
+                                        int re = (lastColor >> 16) & 0xFF;
+                                        int gr = (lastColor >> 8) & 0xFF;
+                                        int bl = lastColor & 0xFF;
+
+                                        if ((r + g + b) < (re + gr + bl)) {
+                                            BI.setRGB(col, y, lastColor);
+                                            BI.setRGB(col, y - 1, currentColor);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

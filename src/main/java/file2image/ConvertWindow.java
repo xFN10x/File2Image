@@ -22,8 +22,9 @@ public class ConvertWindow extends Stage {
     protected final TextArea log = new TextArea();
     protected final StringBuilder logText = new StringBuilder("Log Start");
     public final double totalBytes;
-    public  double amount;
+    public double amount;
     protected final Timer timer = new Timer();
+    private String lastCustomMessage = "";
 
     public void dispose() {
         setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -36,6 +37,23 @@ public class ConvertWindow extends Stage {
         });
         timer.cancel();
         close();
+    }
+
+    public void addLog(String message, double xdivby, double y) {
+        Platform.runLater(() -> {
+
+            if (!("Wrote pixel: " + String.valueOf((long) amount) + "/"
+                    + String.valueOf((long) totalBytes) + "\n").equals(lastCustomMessage))
+                logText.insert(0, message + ": " + String.valueOf((long) xdivby) + "/"
+                        + String.valueOf((long) y) + "\n");
+            if (logText.length() > 1000) {
+                logText.setLength(500);
+            }
+            if (lastCustomMessage.equals("Wrote pixel: " + String.valueOf((long) amount) + "/"
+                    + String.valueOf((long) totalBytes) + "\n"))
+                lastCustomMessage = "Wrote pixel: " + String.valueOf((long) amount) + "/"
+                        + String.valueOf((long) totalBytes) + "\n";
+        });
     }
 
     public void setBytesRead(double amount) {
@@ -58,16 +76,17 @@ public class ConvertWindow extends Stage {
                     log.setText(logText.toString());
 
                     prog.setProgress((amount / totalBytes));
+
                     logText.insert(0, "Wrote pixel: " + String.valueOf((long) amount) + "/"
                             + String.valueOf((long) totalBytes) + "\n");
                     if (logText.length() > 1000) {
                         logText.setLength(500);
                     }
-                    //System.out.println(prog.getProgress());
+                    // System.out.println(prog.getProgress());
                 });
             }
 
-        }, 0, 1);
+        }, 0, 5);
 
         log.textProperty().addListener(c -> {
             // log.setScrollTop(Double.MIN_VALUE);

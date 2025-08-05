@@ -36,7 +36,7 @@ public class PureByte implements Method {
             });
             int pixelAmount = (int) (Files.size(Input.toPath()) / 3);
             // byte[] InputBytes = Files.readAllBytes(Input.toPath()); too much ram
-            System.out.println(pixelAmount);
+            //System.out.println(pixelAmount);
             int dimension = (int) Math.ceil(Math.sqrt(pixelAmount));
             BufferedImage BI = new BufferedImage(dimension, dimension, BufferedImage.TYPE_INT_RGB);
             File outFile = Output.toFile();
@@ -80,10 +80,13 @@ public class PureByte implements Method {
                     int lastColor = 0;
                     int currentColor = 0;
 
+                    int passes = 1000;
+
                     switch (sorting) {
                         case SortingMode.brightness:
                             for (int col = 0; col < BI.getWidth(); col++) {
-                                for (int i = 0; i < 200; i++) {
+                                for (int i = 0; i < passes; i++) {
+                                    convRef[0].addLog("Sorting pass", i * col, passes * BI.getWidth());
                                     for (int y = 1; y < BI.getHeight(); y++) {
                                         lastColor = currentColor;
                                         currentColor = BI.getRGB(col, y);
@@ -107,7 +110,8 @@ public class PureByte implements Method {
 
                         case SortingMode.red:
                             for (int col = 0; col < BI.getWidth(); col++) {
-                                for (int i = 0; i < 200; i++) {
+                                for (int i = 0; i < passes; i++) {
+                                    convRef[0].addLog("Sorting pass", i * col, passes * BI.getWidth());
                                     for (int y = 1; y < BI.getHeight(); y++) {
                                         lastColor = currentColor;
                                         currentColor = BI.getRGB(col, y);
@@ -127,7 +131,8 @@ public class PureByte implements Method {
 
                         case SortingMode.green:
                             for (int col = 0; col < BI.getWidth(); col++) {
-                                for (int i = 0; i < 200; i++) {
+                                for (int i = 0; i < passes; i++) {
+                                    convRef[0].addLog("Sorting pass", i * col, passes * BI.getWidth());
                                     for (int y = 1; y < BI.getHeight(); y++) {
                                         lastColor = currentColor;
                                         currentColor = BI.getRGB(col, y);
@@ -147,7 +152,8 @@ public class PureByte implements Method {
 
                         case SortingMode.blue:
                             for (int col = 0; col < BI.getWidth(); col++) {
-                                for (int i = 0; i < 200; i++) {
+                                for (int i = 0; i < passes; i++) {
+                                    convRef[0].addLog("Sorting pass", i * col, passes * BI.getWidth());
                                     for (int y = 1; y < BI.getHeight(); y++) {
                                         lastColor = currentColor;
                                         currentColor = BI.getRGB(col, y);
@@ -157,6 +163,37 @@ public class PureByte implements Method {
                                         int gr = (lastColor >> 8) & 0xFF;
 
                                         if ((g) < (gr)) {
+                                            BI.setRGB(col, y, lastColor);
+                                            BI.setRGB(col, y - 1, currentColor);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case SortingMode.hue:
+                            for (int col = 0; col < BI.getWidth(); col++) {
+                                for (int i = 0; i < passes; i++) {
+                                    convRef[0].addLog("Sorting pass", i * col, passes * BI.getWidth());
+                                    for (int y = 1; y < BI.getHeight(); y++) {
+                                        lastColor = currentColor;
+                                        currentColor = BI.getRGB(col, y);
+
+                                        int r = (currentColor >> 16) & 0xFF;
+                                        int g = (currentColor >> 8) & 0xFF;
+                                        int b = currentColor & 0xFF;
+
+                                        int re = (lastColor >> 16) & 0xFF;
+                                        int gr = (lastColor >> 8) & 0xFF;
+                                        int bl = lastColor & 0xFF;
+
+                                        float[] currentHSB = Color.RGBtoHSB(r, g, b, null);
+                                        float currenthue = currentHSB[0]; // 0.0 to 1.0
+
+                                        float[] lastHSB = Color.RGBtoHSB(re, gr, bl, null);
+                                        float lasthue = lastHSB[0]; // 0.0 to 1.0
+
+                                        if ((currenthue) < (lasthue)) {
                                             BI.setRGB(col, y, lastColor);
                                             BI.setRGB(col, y - 1, currentColor);
                                         }

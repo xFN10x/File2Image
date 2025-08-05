@@ -95,7 +95,7 @@ public class Launcher extends Application {
 
         Label sortingModeLabel = new Label("Sorting Mode:");
         ComboBox<SortingMode> sortingModeSelection = new ComboBox<SortingMode>();
-        sortingModeSelection.getItems().addAll(SortingMode.none,SortingMode.brightness);
+        sortingModeSelection.getItems().addAll(SortingMode.none,SortingMode.brightness,SortingMode.hue,SortingMode.red,SortingMode.green,SortingMode.blue);
         sortingModeSelection.setValue(sortingModeSelection.getItems().get(0));
 
         HBox inputStuff = new HBox(8, inputFilePathField, inputFileButton);
@@ -104,10 +104,12 @@ public class Launcher extends Application {
         outputStuff.setAlignment(Pos.CENTER);
         HBox methodStuff = new HBox(8, methodText, methodSelection,sortingModeLabel,sortingModeSelection);
         methodStuff.setAlignment(Pos.CENTER);
+        HBox sortingStuff = new HBox(8 );
+        sortingStuff.setAlignment(Pos.CENTER);
 
         convertButton.setMinSize(380, 30);
 
-        VBox stuff = new VBox(10, inputStuff, outputStuff, methodStuff, convertButton);
+        VBox stuff = new VBox(10, inputStuff, outputStuff, methodStuff,sortingStuff, convertButton);
         stuff.setAlignment(Pos.TOP_CENTER);
         stuff.setPadding(new Insets(20, 0, 0, 0));
 
