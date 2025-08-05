@@ -63,7 +63,7 @@ public class ConvertWindow extends Stage {
                     if (logText.length() > 1000) {
                         logText.setLength(500);
                     }
-                    System.out.println(prog.getProgress());
+                    //System.out.println(prog.getProgress());
                 });
             }
 
@@ -93,6 +93,7 @@ public class ConvertWindow extends Stage {
 
         });
 
+        setResizable(false);
         getIcons().add(new Image(getClass().getResource("/icon.png").toExternalForm()));
         setTitle("Converting...");
         setScene(scene);

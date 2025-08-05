@@ -60,6 +60,9 @@ tasks.jpackage {
     appName = "File2Img"
     vendor = "_FN10_"
 
+    icon = file("src/main/resources/icon.png")
+
+
     type = org.panteleyev.jpackage.ImageType.APP_IMAGE
 
     mainJar = "File2Img-$version-all.jar"

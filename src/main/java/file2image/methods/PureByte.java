@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import file2image.ConvertWindow;
+import file2image.data.SortingMode;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -20,7 +21,7 @@ public class PureByte implements Method {
     private ConvertWindow[] convRef = new ConvertWindow[1];
 
     @Override
-    public void Start(Scene scene, File Input, Path Output) {
+    public void Start(Scene scene, File Input, Path Output, SortingMode sorting) {
         try {
 
             Platform.runLater(() -> {
@@ -36,9 +37,8 @@ public class PureByte implements Method {
             int pixelAmount = (int) (Files.size(Input.toPath()) / 3);
             // byte[] InputBytes = Files.readAllBytes(Input.toPath()); too much ram
             System.out.println(pixelAmount);
-            int width = 128;
-            int height = (int) Math.ceil((double) pixelAmount / width);
-            BufferedImage BI = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            int dimension = (int) Math.ceil(Math.sqrt(pixelAmount));
+            BufferedImage BI = new BufferedImage(dimension, dimension, BufferedImage.TYPE_INT_RGB);
             File outFile = Output.toFile();
             long starttime = System.currentTimeMillis();
 
@@ -56,8 +56,9 @@ public class PureByte implements Method {
 
                         if (convRef[0] != null)
                             convRef[0].setBytesRead(bytesread);
-
-                        if (index >= width) {
+                        // System.out.println(index);
+                        // System.out.println(line);
+                        if (index >= dimension) {
                             line++;
                             index = 0;
                         }
@@ -75,6 +76,98 @@ public class PureByte implements Method {
 
                     if (!outFile.exists())
                         outFile.createNewFile();
+
+                    int lastColor = 0;
+                    int currentColor = 0;
+
+                    switch (sorting) {
+                        case SortingMode.brightness:
+                            for (int col = 0; col < BI.getWidth(); col++) {
+                                for (int i = 0; i < 200; i++) {
+                                    for (int y = 1; y < BI.getHeight(); y++) {
+                                        lastColor = currentColor;
+                                        currentColor = BI.getRGB(col, y);
+
+                                        int r = (currentColor >> 16) & 0xFF;
+                                        int g = (currentColor >> 8) & 0xFF;
+                                        int b = currentColor & 0xFF;
+
+                                        int re = (lastColor >> 16) & 0xFF;
+                                        int gr = (lastColor >> 8) & 0xFF;
+                                        int bl = lastColor & 0xFF;
+
+                                        if ((r + g + b) < (re + gr + bl)) {
+                                            BI.setRGB(col, y, lastColor);
+                                            BI.setRGB(col, y - 1, currentColor);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case SortingMode.red:
+                            for (int col = 0; col < BI.getWidth(); col++) {
+                                for (int i = 0; i < 200; i++) {
+                                    for (int y = 1; y < BI.getHeight(); y++) {
+                                        lastColor = currentColor;
+                                        currentColor = BI.getRGB(col, y);
+
+                                        int r = (currentColor >> 16) & 0xFF;
+
+                                        int re = (lastColor >> 16) & 0xFF;
+
+                                        if ((r) < (re)) {
+                                            BI.setRGB(col, y, lastColor);
+                                            BI.setRGB(col, y - 1, currentColor);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case SortingMode.green:
+                            for (int col = 0; col < BI.getWidth(); col++) {
+                                for (int i = 0; i < 200; i++) {
+                                    for (int y = 1; y < BI.getHeight(); y++) {
+                                        lastColor = currentColor;
+                                        currentColor = BI.getRGB(col, y);
+
+                                        int b = currentColor & 0xFF;
+
+                                        int bl = lastColor & 0xFF;
+
+                                        if ((b) < (bl)) {
+                                            BI.setRGB(col, y, lastColor);
+                                            BI.setRGB(col, y - 1, currentColor);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case SortingMode.blue:
+                            for (int col = 0; col < BI.getWidth(); col++) {
+                                for (int i = 0; i < 200; i++) {
+                                    for (int y = 1; y < BI.getHeight(); y++) {
+                                        lastColor = currentColor;
+                                        currentColor = BI.getRGB(col, y);
+
+                                        int g = (currentColor >> 8) & 0xFF;
+
+                                        int gr = (lastColor >> 8) & 0xFF;
+
+                                        if ((g) < (gr)) {
+                                            BI.setRGB(col, y, lastColor);
+                                            BI.setRGB(col, y - 1, currentColor);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

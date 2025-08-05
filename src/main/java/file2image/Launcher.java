@@ -1,7 +1,12 @@
 package file2image;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
+
+import file2image.data.MethodType;
+import file2image.data.SortingMode;
+import file2image.methods.Intensity;
 import file2image.methods.PureByte;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -84,15 +89,20 @@ public class Launcher extends Application {
         });
 
         Label methodText = new Label("Selected Method:");
-        ComboBox<String> methodSelection = new ComboBox<String>();
-        methodSelection.getItems().addAll("Pure Byte");
+        ComboBox<MethodType> methodSelection = new ComboBox<MethodType>();
+        methodSelection.getItems().addAll(MethodType.PureByte,MethodType.Intensity);
         methodSelection.setValue(methodSelection.getItems().get(0));
+
+        Label sortingModeLabel = new Label("Sorting Mode:");
+        ComboBox<SortingMode> sortingModeSelection = new ComboBox<SortingMode>();
+        sortingModeSelection.getItems().addAll(SortingMode.none,SortingMode.brightness);
+        sortingModeSelection.setValue(sortingModeSelection.getItems().get(0));
 
         HBox inputStuff = new HBox(8, inputFilePathField, inputFileButton);
         inputStuff.setAlignment(Pos.CENTER);
         HBox outputStuff = new HBox(8, outputFilePathField, outputFileButton);
         outputStuff.setAlignment(Pos.CENTER);
-        HBox methodStuff = new HBox(8, methodText, methodSelection);
+        HBox methodStuff = new HBox(8, methodText, methodSelection,sortingModeLabel,sortingModeSelection);
         methodStuff.setAlignment(Pos.CENTER);
 
         convertButton.setMinSize(380, 30);
@@ -111,8 +121,19 @@ public class Launcher extends Application {
         Scene scene = new Scene(tabs, 400, 195);
 
         convertButton.setOnAction(e -> {
-            new Thread(() -> new PureByte().Start(scene, new File(inputFilePathField.getText()),
-                    Path.of(outputFilePathField.getText()))).start();
+            switch (methodSelection.getValue()) {
+                case MethodType.PureByte:
+                    new Thread(() -> new PureByte().Start(scene, new File(inputFilePathField.getText()),
+                            Path.of(outputFilePathField.getText()), sortingModeSelection.getValue())).start();
+                            break;
+                case MethodType.Intensity:
+                    new Thread(() -> new Intensity().Start(scene, new File(inputFilePathField.getText()),
+                            Path.of(outputFilePathField.getText()), sortingModeSelection.getValue())).start();
+                            break;
+
+                default:
+                    break;
+            }
         });
 
         refreshButton();
